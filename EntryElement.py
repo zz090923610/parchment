@@ -1,5 +1,6 @@
 __author__ = 'zhangzhao'
 import time
+from xml.etree import ElementTree as et
 
 
 class EntryElement(object):
@@ -10,6 +11,8 @@ class EntryElement(object):
         self.category = category
         self.status = status
         self.comment_list = {}
+        self.tree = None
+        self.root = None
 
     def __str__(self):
         result = 'Name: ' + self.name + '\nCategory: ' + self.category + '\nCreated time: ' + time.strftime(
@@ -17,5 +20,23 @@ class EntryElement(object):
         return result
 
     def save(self, path):
-        with open(path, mode='w', encoding='utf-8') as a_file:
-            a_file.write(self.__str__())
+        self.generate_xml()
+        self.tree.write(path, encoding='utf-8')
+        #with open(path, mode='w', encoding='utf-8') as a_file:
+        #   a_file.write(self.__str__())
+
+    def dict_to_elem(self, dictionary, element_name):
+        item = et.Element(element_name)
+        for key in dictionary:
+            field = et.Element(key.replace(' ', ''))
+            field.text = dictionary[key]
+            item.append(field)
+        return item
+
+    def generate_xml(self):
+        self.root = et.Element('job_element')     # create the element first...
+        self.tree = et.ElementTree(self.root)
+        self.root.append(self.dict_to_elem(
+            {'name': self.name, 'create_time': str(self.create_time), 'category': self.category, 'status': self.status},
+            'meta'))
+        self.root.append(self.dict_to_elem(self.comment_list, 'comments'))
