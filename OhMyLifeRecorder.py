@@ -3,6 +3,7 @@ __author__ = 'zhangzhao'
 from optparse import OptionParser
 import time
 import os
+import xml
 from EntryElement import *
 
 
@@ -15,7 +16,6 @@ class FileOperator(object):
     def create_job(self, job_name):
         print(time.strftime('%Y-%m-%d, %H:%M:%S, new job ', time.localtime(time.time())) + job_name + ' is created')
         self.current_job_path = os.path.join(self.data_path, job_name)
-        #print(self.current_job_path)
         if not os.path.isfile(self.current_job_path):
             os.popen('touch ' + self.current_job_path)
             print(type(self.current_job_path))
@@ -30,6 +30,15 @@ class FileOperator(object):
 
     def comment_a_job(self, job_name, comment):
         job_path = os.path.join(self.data_path, job_name)
+        tree = xml.etree.ElementTree.parse(job_path)
+        root = tree.getroot()
+        xml.etree.ElementTree.dump(root)
+        xml.etree.ElementTree.SubElement(root[1], 'comment_element',
+                                         {'time': str(time.time()), 'content': comment})
+        tree.write(job_path, encoding='utf-8')
+
+    def start(self):
+        job_path = os.path.join(self.data_path, 'tocao')
         job_entry = EntryElement()
         job_entry.read_from_xml(job_path)
         print(job_entry)
@@ -59,6 +68,7 @@ if __name__ == "__main__":
         file_operator.create_job(options.new_job_name)
     elif (options.name is not None) & (options.comment is not None):
         file_operator.comment_a_job(options.name, options.comment)
-        #print("None")
+    elif options.start is not None:
+        file_operator.start()
     else:
         pass

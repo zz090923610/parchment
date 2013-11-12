@@ -17,11 +17,8 @@ class EntryElement(object):
     def __str__(self):
         result = 'Name: ' + self.name + '\nCategory: ' + self.category + '\nCreated time: ' + time.strftime(
             '%Y-%m-%d, %H:%M:%S ', time.localtime(self.create_time)) + '\nStatus: ' + self.status
-        temp_string = self.comment_list
-        for comment_element in self.comment_list:
-            tmp = temp_string.popitem()
-            result += '\n\tTIme: ' + time.strftime(
-                '%Y-%m-%d, %H:%M:%S ', time.localtime(tmp[0])) + '\t' + tmp[1]
+        temp_list = self.comment_list
+        result += '\n' + temp_list.__str__()
         return result
 
     def save(self, path):
@@ -59,5 +56,5 @@ class EntryElement(object):
             self.status = status.text
         for finish_time in root.iter('finish_time'):
             self.finish_time = finish_time.text
-        for comment_element in root.iter('comment'):
-            self.comment_list.update(comment_element)
+        for comment_element in root.iter('comment_element'):
+            self.comment_list.update(comment_element.attrib)
