@@ -1,3 +1,5 @@
+import subprocess
+
 __author__ = 'zhangzhao'
 
 from optparse import OptionParser
@@ -5,6 +7,7 @@ import time
 import os
 import xml
 from EntryElement import *
+from AliasListControl import *
 
 
 class FileOperator(object):
@@ -23,8 +26,12 @@ class FileOperator(object):
             create_time = time.time()
             job_entry = EntryElement(job_name, category, 'created', create_time)
             print(job_entry)
-
             job_entry.save(self.current_job_path)
+            alias_controller = AliasListControl()
+            alias = 'alias job' + job_name + '=\'python3 ~/PycharmProjects/OhMyLifeRecorder/OhMyLifeRecorder.py -n' + job_name + '\'\n'
+            alias_controller.add_alias(alias)
+            self.refresh_aliases()
+
         else:
             print('Job named ' + job_name + ' already existed')
 
@@ -32,16 +39,21 @@ class FileOperator(object):
         job_path = os.path.join(self.data_path, job_name)
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
-        xml.etree.ElementTree.dump(root)
         xml.etree.ElementTree.SubElement(root[1], 'comment_element',
                                          {'time': str(time.time()), 'content': comment})
         tree.write(job_path, encoding='utf-8')
 
-    def start(self):
-        job_path = os.path.join(self.data_path, 'tocao')
-        job_entry = EntryElement()
-        job_entry.read_from_xml(job_path)
-        print(job_entry)
+    def start_recorder(self):
+        alias_controller = AliasListControl()
+        os.popen('cp ~/.bash_aliases ~/.bash_aliases.bak')
+        os.popen('cat ' + alias_controller.path + '>> ~/.bash_aliases')
+
+    def stop_recorder(self):
+        os.popen('~/.bash_aliases.bak ~/.bash_aliases')
+
+    def refresh_aliases(self):
+        self.stop_recorder()
+        self.start_recorder()
 
     def init_data_path(self, data_path=os.path.expanduser('~/OhMyLifeRecorderUserData')):
         self.data_path = data_path
@@ -58,6 +70,8 @@ if __name__ == "__main__":
     parser.add_option('-n', '--name', action='store', type='string', dest='name', help='specify a job name')
     parser.add_option('-s', '--start', action='store_true', dest='start', default=False,
                       help='start last suspended job and add alias')
+    parser.add_option('-k', '--kill', action='store_true', dest='kill', default=False,
+                      help='Stop Recorder and restore alias')
     #parser.add_option('-l', '--list', action='store_true', dest='list', help='user account')
     #parser.add_option('-a', '--adapter', action='store', type='string', dest='adapter',
     #                 help='specify which network adapter to use')
@@ -69,6 +83,8 @@ if __name__ == "__main__":
     elif (options.name is not None) & (options.comment is not None):
         file_operator.comment_a_job(options.name, options.comment)
     elif options.start is not None:
-        file_operator.start()
+        file_operator.start_recorder()
+    elif options.kill is not None:
+        file_operator.stop_recorder()
     else:
         pass
