@@ -15,6 +15,13 @@ class FileOperator(object):
         self.data_path = None
         self.init_data_path()
         self.current_job_path = ''
+        self.current_job = EntryElement()
+
+    def save_current_job_info(self):
+        pass
+
+    def read_current_job_info(self):
+        pass
 
     def create_job(self, job_name):
         print(time.strftime('%Y-%m-%d, %H:%M:%S, new job ', time.localtime(time.time())) + job_name + ' is created')
@@ -28,7 +35,8 @@ class FileOperator(object):
             print(job_entry)
             job_entry.save(self.current_job_path)
             alias_controller = AliasListControl()
-            alias = 'alias job' + job_name + '=\'python3 ~/PycharmProjects/OhMyLifeRecorder/OhMyLifeRecorder.py -n' + job_name + '\'\n'
+            alias = 'alias job' + job_name + '=\'python3 ~/PycharmProjects/OhMyLifeRecorder/OhMyLifeRecorder.py -n' + \
+                    job_name + '\'\n'
             alias_controller.add_alias(alias)
             self.refresh_aliases()
 
@@ -51,6 +59,71 @@ class FileOperator(object):
     def stop_recorder(self):
         os.popen('mv ~/.bash_aliases.bak ~/.bash_aliases')
 
+    def suspend_job(self, name):
+        job_path = os.path.join(self.data_path, name)
+        tree = xml.etree.ElementTree.parse(job_path)
+        root = tree.getroot()
+        status = None
+        suspend_time = str(time.time())
+        for it in root.iter('status'):
+            status = it.text
+            it.text = 'suspended'
+        for it in root.iter('status_change_time'):
+            it.text = suspend_time
+        if status != 'suspended':
+            xml.etree.ElementTree.SubElement(root[1], 'status_changed',
+                                             {'from': status, 'to': 'suspended', 'time': suspend_time})
+        tree.write(job_path, encoding='utf-8')
+        self.read_current_job_info()
+        if self.current_job.name == name:
+            self.current_job = EntryElement()
+        self.save_current_job_info()
+
+    def proceeding_job(self, name):
+        job_path = os.path.join(self.data_path, name)
+        tree = xml.etree.ElementTree.parse(job_path)
+        root = tree.getroot()
+        status_change_time = str(time.time())
+        status = None
+        for it in root.iter('status_change_time'):
+            it.text = status_change_time
+        for it in root.iter('status'):
+            status = it.text
+            it.text = 'proceeding'
+        if status != 'proceeding':
+            xml.etree.ElementTree.SubElement(root[1], 'status_changed',
+                                             {'from': status, 'to': 'proceeding', 'time': status_change_time})
+        tree.write(job_path, encoding='utf-8')
+        self.read_current_job_info()
+        if self.current_job.name == name:
+            self.current_job = EntryElement()
+            self.current_job.read_from_xml(job_path)
+        elif (self.current_job.name != name) & (self.current_job.status == 'proceeding'):
+            self.suspend_job(self.current_job.name)
+            self.current_job = EntryElement()
+            self.current_job.read_from_xml(job_path)
+        self.save_current_job_info()
+
+    def finalize_job(self, name):
+        job_path = os.path.join(self.data_path, name)
+        tree = xml.etree.ElementTree.parse(job_path)
+        root = tree.getroot()
+        status = None
+        finished_time = str(time.time())
+        for it in root.iter('status'):
+            status = it.text
+            it.text = 'finished'
+        for it in root.iter('status_change_time'):
+            it.text = finished_time
+        if status != 'finished':
+            xml.etree.ElementTree.SubElement(root[1], 'status_changed',
+                                             {'from': status, 'to': 'finished', 'time': finished_time})
+        tree.write(job_path, encoding='utf-8')
+        self.read_current_job_info()
+        if self.current_job.name == name:
+            self.current_job = EntryElement()
+        self.save_current_job_info()
+
     def refresh_aliases(self):
         self.stop_recorder()
         self.start_recorder()
@@ -72,12 +145,11 @@ if __name__ == "__main__":
                       help='start last suspended job and add alias')
     parser.add_option('-k', '--kill', action='store_true', dest='kill', default=False,
                       help='Stop Recorder and restore alias')
-    #parser.add_option('-l', '--list', action='store_true', dest='list', help='user account')
-    #parser.add_option('-a', '--adapter', action='store', type='string', dest='adapter',
-    #                 help='specify which network adapter to use')
+    parser.add_option('-g', '--go', action='store_true', dest='go', default=False, help='start a job')
+    parser.add_option('-p', '--suspend', action='store_true', dest='suspend', default=False, help='suspend a job')
+    parser.add_option('-f', '--finalize', action='store_true', dest='finalize', default=False,
+                      help='mark a job as finished')
     (options, args) = parser.parse_args()
-    #if (options.user is not None) & (options.adapter is not None):
-    #   options.mode = False
     if options.new_job_name is not None:
         file_operator.create_job(options.new_job_name)
     elif (options.name is not None) & (options.comment is not None):
@@ -86,5 +158,11 @@ if __name__ == "__main__":
         file_operator.start_recorder()
     elif options.kill is True:
         file_operator.stop_recorder()
+    elif options.suspend is True:
+        file_operator.suspend_job(options.name)
+    elif (options.name is not None) & (options.go is True):
+        file_operator.proceeding_job(options.name)
+    elif (options.name is not None) & (options.finalize is True):
+        file_operator.finalize_job(options.name)
     else:
         pass

@@ -7,7 +7,7 @@ class EntryElement(object):
     def __init__(self, name='None', category='unspecified', status='None', create_time='None'):
         self.name = name
         self.create_time = create_time
-        self.finish_time = 0
+        self.status_change_time = 0
         self.category = category
         self.status = status
         self.comment_list = {}
@@ -39,7 +39,8 @@ class EntryElement(object):
         self.root = et.Element('job_element')     # create the element first...
         self.tree = et.ElementTree(self.root)
         self.root.append(self.dict_to_elem(
-            {'name': self.name, 'create_time': str(self.create_time), 'category': self.category, 'status': self.status},
+            {'name': self.name, 'create_time': str(self.create_time), 'category': self.category, 'status': self.status,
+             'status_change_time': str(self.status_change_time)},
             'meta'))
         self.root.append(self.dict_to_elem(self.comment_list, 'comments'))
 
@@ -56,5 +57,5 @@ class EntryElement(object):
             self.status = status.text
         for finish_time in root.iter('finish_time'):
             self.finish_time = finish_time.text
-        for comment_element in root.iter('comment_element'):
-            self.comment_list.update(comment_element.attrib)
+            #for comment_element in root.iter('comment_element'):
+            #    self.comment_list.update(comment_element.attrib)
