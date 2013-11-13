@@ -49,7 +49,7 @@ class FileOperator(object):
         os.popen('cat ' + alias_controller.path + '>> ~/.bash_aliases')
 
     def stop_recorder(self):
-        os.popen('~/.bash_aliases.bak ~/.bash_aliases')
+        os.popen('mv ~/.bash_aliases.bak ~/.bash_aliases')
 
     def refresh_aliases(self):
         self.stop_recorder()
@@ -82,9 +82,9 @@ if __name__ == "__main__":
         file_operator.create_job(options.new_job_name)
     elif (options.name is not None) & (options.comment is not None):
         file_operator.comment_a_job(options.name, options.comment)
-    elif options.start is not None:
+    elif options.start is True:
         file_operator.start_recorder()
-    elif options.kill is not None:
+    elif options.kill is True:
         file_operator.stop_recorder()
     else:
         pass
