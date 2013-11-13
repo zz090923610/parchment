@@ -55,7 +55,7 @@ class EntryElement(object):
             self.category = category.text
         for status in root.iter('status'):
             self.status = status.text
-        for finish_time in root.iter('finish_time'):
-            self.finish_time = finish_time.text
-            #for comment_element in root.iter('comment_element'):
-            #    self.comment_list.update(comment_element.attrib)
+        for status_change_time in root.iter('status_change_time'):
+            self.status_change_time = status_change_time.text
+        for comment_element in root.iter('comment_element'):
+            self.comment_list.update(comment_element.attrib)

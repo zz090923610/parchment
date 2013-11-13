@@ -124,6 +124,13 @@ class FileOperator(object):
             self.current_job = EntryElement()
         self.save_current_job_info()
 
+    def show_comments(self, name):
+        job_path = os.path.join(self.data_path, name)
+        entry = EntryElement()
+        entry.read_from_xml(job_path)
+
+
+
     def refresh_aliases(self):
         self.stop_recorder()
         self.start_recorder()
@@ -149,6 +156,7 @@ if __name__ == "__main__":
     parser.add_option('-p', '--suspend', action='store_true', dest='suspend', default=False, help='suspend a job')
     parser.add_option('-f', '--finalize', action='store_true', dest='finalize', default=False,
                       help='mark a job as finished')
+    parser.add_option('-o', '--show', action='store_true', dest='show', default=False, help='show comments')
     (options, args) = parser.parse_args()
     if options.new_job_name is not None:
         file_operator.create_job(options.new_job_name)
@@ -164,5 +172,7 @@ if __name__ == "__main__":
         file_operator.proceeding_job(options.name)
     elif (options.name is not None) & (options.finalize is True):
         file_operator.finalize_job(options.name)
+    elif (options.name is not None) & (options.show is True):
+        file_operator.show_comments(options.name)
     else:
         pass
