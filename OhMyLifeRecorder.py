@@ -54,7 +54,7 @@ class FileOperator(object):
     def start_recorder(self):
         alias_controller = AliasListControl()
         os.popen('cp ~/.bash_aliases ~/.bash_aliases.bak')
-        os.popen('cat ' + alias_controller.path + '>> ~/.bash_aliases')
+        os.popen('cp ' + alias_controller.path + ' ~/.bash_aliases')
 
     def stop_recorder(self):
         os.popen('mv ~/.bash_aliases.bak ~/.bash_aliases')
