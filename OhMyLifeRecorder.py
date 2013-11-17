@@ -1,5 +1,3 @@
-import subprocess
-
 __author__ = 'zhangzhao'
 
 from optparse import OptionParser
@@ -43,7 +41,6 @@ class FileOperator(object):
             alias = 'alias job' + job_name + '=\'python3 ~/PycharmProjects/OhMyLifeRecorder/OhMyLifeRecorder.py -n' + \
                     job_name + '\'\n'
             alias_controller.add_alias(alias)
-            self.refresh_aliases()
 
         else:
             print('Job named ' + job_name + ' already existed')
@@ -56,13 +53,9 @@ class FileOperator(object):
                                          {'time': str(time.time()), 'content': comment})
         tree.write(job_path, encoding='utf-8')
 
-    def start_recorder(self):
-        alias_controller = AliasListControl()
-        os.popen('cp ~/.bash_aliases ~/.bash_aliases.bak')
-        os.popen('cp ' + alias_controller.path + ' ~/.bash_aliases')
-
-    def stop_recorder(self):
-        os.popen('mv ~/.bash_aliases.bak ~/.bash_aliases')
+    def init_recorder(self):
+        self.__init__()
+        alias_controler = AliasListControl()
 
     def suspend_job(self, name):
         job_path = os.path.join(self.data_path, name)
@@ -143,14 +136,7 @@ class FileOperator(object):
         generator = MarkDownGenerator(entry, os.path.expanduser(digest_path))
         generator.generate_process()
 
-    def refresh_aliases(self):
-        self.stop_recorder()
-        self.start_recorder()
 
-    def init_data_path(self, data_path=os.path.expanduser('~/OhMyLifeRecorderUserData')):
-        self.data_path = data_path
-        if not os.path.isdir(self.data_path):
-            os.mkdir(self.data_path)
 
 
 if __name__ == "__main__":
@@ -160,10 +146,8 @@ if __name__ == "__main__":
                       help='create a new job you want to do')
     parser.add_option('-m', '--comment', action='store', type='string', dest='comment', help='comment a job')
     parser.add_option('-n', '--name', action='store', type='string', dest='name', help='specify a job name')
-    parser.add_option('-s', '--start', action='store_true', dest='start', default=False,
-                      help='start last suspended job and add alias')
-    parser.add_option('-k', '--kill', action='store_true', dest='kill', default=False,
-                      help='Stop Recorder and restore alias')
+    parser.add_option('-i', '--init', action='store_true', dest='init', default=False,
+                      help='initiate operation for the first time run')
     parser.add_option('-g', '--go', action='store_true', dest='go', default=False, help='start a job')
     parser.add_option('-p', '--suspend', action='store_true', dest='suspend', default=False, help='suspend a job')
     parser.add_option('-f', '--finalize', action='store_true', dest='finalize', default=False,
@@ -176,10 +160,8 @@ if __name__ == "__main__":
         file_operator.create_job(options.new_job_name)
     elif (options.name is not None) & (options.comment is not None):
         file_operator.comment_a_job(options.name, options.comment)
-    elif options.start is True:
-        file_operator.start_recorder()
-    elif options.kill is True:
-        file_operator.stop_recorder()
+    elif options.init is True:
+        file_operator.init_recorder()
     elif options.suspend is True:
         file_operator.suspend_job(options.name)
     elif (options.name is not None) & (options.go is True):
