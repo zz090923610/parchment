@@ -17,12 +17,13 @@ class EntryElement(object):
 
     def __str__(self):
         result = 'Name: ' + self.name + '\nCategory: ' + self.category + '\nCreated time: ' + time.strftime(
-            '%Y-%m-%d, %H:%M:%S ', time.localtime(self.create_time)) + '\nStatus: ' + self.status + ' since '+ time.strftime(
+            '%Y-%m-%d, %H:%M:%S ',
+            time.localtime(self.create_time)) + '\nStatus: ' + self.status + ' since ' + time.strftime(
             '%Y-%m-%d, %H:%M:%S ', time.localtime(self.status_change_time))
         result += '\n***** Status change history *****'
         for loop in self.status_change_list:
             result += '\n\t' + time.strftime('%m-%d, %H:%M:%S: ',
-                                             time.localtime(float(loop['time']))) + 'status changed from ' +\
+                                             time.localtime(float(loop['time']))) + 'status changed from ' + \
                       loop['from'] + ' to ' + loop['to']
         result += '\n***** Comments *****'
         for loop in self.comment_list:

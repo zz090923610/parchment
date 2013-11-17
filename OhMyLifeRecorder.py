@@ -8,12 +8,17 @@ import os
 import xml
 from EntryElement import *
 from AliasListControl import *
+from MarkdownGenerator import *
 
 
 class FileOperator(object):
     def __init__(self):
-        self.data_path = None
-        self.init_data_path()
+        self.data_path = os.path.expanduser('~/OhMyLifeRecorderUserData')
+        if not os.path.isdir(self.data_path):
+            os.mkdir(self.data_path)
+        self.digest_path = os.path.expanduser('~/OhMyLifeRecorderDigest')
+        if not os.path.isdir(self.digest_path):
+            os.mkdir(self.digest_path)
         self.current_job_path = ''
         self.current_job = EntryElement()
 
@@ -130,6 +135,13 @@ class FileOperator(object):
         entry.read_from_xml(job_path)
         print(entry)
 
+    def dump_md_file(self, name):
+        job_path = os.path.join(self.data_path, name)
+        entry = EntryElement()
+        entry.read_from_xml(job_path)
+        digest_path = os.path.join(self.digest_path, name + '.md')
+        generator = MarkDownGenerator(entry, os.path.expanduser(digest_path))
+        generator.generate_process()
 
     def refresh_aliases(self):
         self.stop_recorder()
@@ -157,6 +169,8 @@ if __name__ == "__main__":
     parser.add_option('-f', '--finalize', action='store_true', dest='finalize', default=False,
                       help='mark a job as finished')
     parser.add_option('-o', '--show', action='store_true', dest='show', default=False, help='show comments')
+    parser.add_option('-d', '--dump', action='store_true', dest='dump_path', default=False,
+                      help='specify a .md file path to generate a markdown format diary')
     (options, args) = parser.parse_args()
     if options.new_job_name is not None:
         file_operator.create_job(options.new_job_name)
@@ -174,5 +188,7 @@ if __name__ == "__main__":
         file_operator.finalize_job(options.name)
     elif (options.name is not None) & (options.show is True):
         file_operator.show_comments(options.name)
+    elif (options.name is not None) & (options.dump_path is True):
+        file_operator.dump_md_file(options.name)
     else:
         pass
