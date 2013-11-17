@@ -10,15 +10,23 @@ class EntryElement(object):
         self.status_change_time = 0
         self.category = category
         self.status = status
-        self.comment_list = {}
+        self.comment_list = []
+        self.status_change_list = []
         self.tree = None
         self.root = None
 
     def __str__(self):
         result = 'Name: ' + self.name + '\nCategory: ' + self.category + '\nCreated time: ' + time.strftime(
             '%Y-%m-%d, %H:%M:%S ', time.localtime(self.create_time)) + '\nStatus: ' + self.status
-        temp_list = self.comment_list
-        result += '\n' + temp_list.__str__()
+        result += '\n***** Status change history *****'
+        for loop in self.status_change_list:
+            result += '\n\t' + time.strftime('%m-%d, %H:%M:%S: ',
+                                             time.localtime(float(loop['time']))) + 'status changed from ' +\
+                      loop['from'] + ' to ' + loop['to']
+        result += '\n***** Comments *****'
+        for loop in self.comment_list:
+            result += '\n' + time.strftime('%m-%d, %H:%M:%S: ', time.localtime(float(loop['time']))) + loop['content']
+
         return result
 
     def save(self, path):
@@ -57,5 +65,7 @@ class EntryElement(object):
             self.status = status.text
         for status_change_time in root.iter('status_change_time'):
             self.status_change_time = status_change_time.text
+        for status_changed in root.iter('status_changed'):
+            self.status_change_list.append(status_changed.attrib)
         for comment_element in root.iter('comment_element'):
-            self.comment_list.update(comment_element.attrib)
+            self.comment_list.append(comment_element.attrib)

@@ -128,7 +128,7 @@ class FileOperator(object):
         job_path = os.path.join(self.data_path, name)
         entry = EntryElement()
         entry.read_from_xml(job_path)
-
+        print(entry)
 
 
     def refresh_aliases(self):
