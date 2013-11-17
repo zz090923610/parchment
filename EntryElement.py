@@ -17,7 +17,8 @@ class EntryElement(object):
 
     def __str__(self):
         result = 'Name: ' + self.name + '\nCategory: ' + self.category + '\nCreated time: ' + time.strftime(
-            '%Y-%m-%d, %H:%M:%S ', time.localtime(self.create_time)) + '\nStatus: ' + self.status
+            '%Y-%m-%d, %H:%M:%S ', time.localtime(self.create_time)) + '\nStatus: ' + self.status + ' since '+ time.strftime(
+            '%Y-%m-%d, %H:%M:%S ', time.localtime(self.status_change_time))
         result += '\n***** Status change history *****'
         for loop in self.status_change_list:
             result += '\n\t' + time.strftime('%m-%d, %H:%M:%S: ',
@@ -64,7 +65,7 @@ class EntryElement(object):
         for status in root.iter('status'):
             self.status = status.text
         for status_change_time in root.iter('status_change_time'):
-            self.status_change_time = status_change_time.text
+            self.status_change_time = float(status_change_time.text)
         for status_changed in root.iter('status_changed'):
             self.status_change_list.append(status_changed.attrib)
         for comment_element in root.iter('comment_element'):
