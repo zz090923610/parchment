@@ -35,6 +35,7 @@ class FileOperator(object):
             category = input('specify to a category ')
             create_time = time.time()
             job_entry = EntryElement(job_name, category, 'created', create_time)
+            job_entry.status_change_time = create_time
             print(job_entry)
             job_entry.save(self.current_job_path)
             alias_controller = AliasListControl()
