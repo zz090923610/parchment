@@ -141,7 +141,6 @@ class FileOperator(object):
         generator.generate_process()
 
     def dump_daily_digest(self):
-        print("daily digest will be here")
         date_today = date.fromtimestamp(time.time())
         os.chdir(self.data_path)
         file_name_list = glob.glob('*.xml')

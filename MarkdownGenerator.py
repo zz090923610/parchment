@@ -83,7 +83,6 @@ class MarkDownGenerator(object):
             self.final_string += '<li>' + time.strftime('%m-%d, %H:%M:%S: ',
                                                         time.localtime(float(loop['time']))) + loop['content'] + \
                                  '</li>\n'
-
     def write_out(self):
         with open(self.out_put_path, mode='w', encoding='utf-8') as a_file:
             a_file.write(self.final_string)
