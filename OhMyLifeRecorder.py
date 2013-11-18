@@ -38,7 +38,7 @@ class FileOperator(object):
             print(job_entry)
             job_entry.save(self.current_job_path)
             alias_controller = AliasListControl()
-            alias = 'alias job' + job_name + '=\'python3 ~/PycharmProjects/OhMyLifeRecorder/OhMyLifeRecorder.py -n' + \
+            alias = 'alias job' + job_name + '=\'recorder -n' + \
                     job_name + '\'\n'
             alias_controller.add_alias(alias)
 
