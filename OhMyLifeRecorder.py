@@ -1,3 +1,5 @@
+import glob
+
 __author__ = 'zhangzhao'
 
 from optparse import OptionParser
@@ -7,6 +9,7 @@ import xml
 from EntryElement import *
 from AliasListControl import *
 from MarkdownGenerator import *
+from datetime import date
 
 
 class FileOperator(object):
@@ -28,7 +31,7 @@ class FileOperator(object):
 
     def create_job(self, job_name):
         print(time.strftime('%Y-%m-%d, %H:%M:%S, new job ', time.localtime(time.time())) + job_name + ' is created')
-        self.current_job_path = os.path.join(self.data_path, job_name+'.xml')
+        self.current_job_path = os.path.join(self.data_path, job_name + '.xml')
         if not os.path.isfile(self.current_job_path):
             os.popen('touch ' + self.current_job_path)
             category = input('specify to a category ')
@@ -46,7 +49,7 @@ class FileOperator(object):
             print('Job named ' + job_name + ' already existed')
 
     def comment_a_job(self, job_name, comment):
-        job_path = os.path.join(self.data_path, job_name+'.xml')
+        job_path = os.path.join(self.data_path, job_name + '.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         xml.etree.ElementTree.SubElement(root[1], 'comment_element',
@@ -58,7 +61,7 @@ class FileOperator(object):
         alias_controler = AliasListControl()
 
     def suspend_job(self, name):
-        job_path = os.path.join(self.data_path, name+'.xml')
+        job_path = os.path.join(self.data_path, name + '.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         status = None
@@ -78,7 +81,7 @@ class FileOperator(object):
         self.save_current_job_info()
 
     def proceeding_job(self, name):
-        job_path = os.path.join(self.data_path, name+'.xml')
+        job_path = os.path.join(self.data_path, name + '.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         status_change_time = str(time.time())
@@ -103,7 +106,7 @@ class FileOperator(object):
         self.save_current_job_info()
 
     def finalize_job(self, name):
-        job_path = os.path.join(self.data_path, name+'.xml')
+        job_path = os.path.join(self.data_path, name + '.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         status = None
@@ -123,22 +126,82 @@ class FileOperator(object):
         self.save_current_job_info()
 
     def show_comments(self, name):
-        job_path = os.path.join(self.data_path, name+'.xml')
+        job_path = os.path.join(self.data_path, name + '.xml')
         entry = EntryElement()
         entry.read_from_xml(job_path)
         print(entry)
 
     def dump_md_file(self, name):
-        job_path = os.path.join(self.data_path, name+'.xml')
+        job_path = os.path.join(self.data_path, name + '.xml')
         entry = EntryElement()
         entry.read_from_xml(job_path)
         digest_path = os.path.join(self.digest_path, name + '.md')
-        generator = MarkDownGenerator(entry, os.path.expanduser(digest_path))
+        generator = MarkDownGenerator(os.path.expanduser(digest_path))
+        generator.entry = entry
         generator.generate_process()
 
     def dump_daily_digest(self):
         print("daily digest will be here")
+        date_today = date.fromtimestamp(time.time())
+        os.chdir(self.data_path)
+        file_name_list = glob.glob('*.xml')
+        digest_path = os.path.join(self.digest_path, 'DailyDigest' + str(date_today) + '.md')
+        generator = MarkDownGenerator(os.path.expanduser(digest_path),date_today)
+        for a_file in file_name_list:
+            job_path = os.path.join(self.data_path, a_file)
+            entry = EntryElement()
+            entry.read_from_xml(job_path)
+            status_modified_today = False
+            comment_modified_today = False
+            for loop in entry.status_change_list:
+                if date.fromtimestamp(float(loop['time'])) == date_today:
+                    status_modified_today = True
+                    break
+            for loop in entry.comment_list:
+                if date.fromtimestamp(float(loop['time'])) == date_today:
+                    comment_modified_today = True
+                    break
+            if (comment_modified_today is True) | (status_modified_today is True):
+                generator.generate_daily_digest_an_entry(entry)
+        generator.generate_daily_digest()
 
+
+
+    def show_daily_digest(self):
+        print("============ What I've done today: ============")
+        date_today = date.fromtimestamp(time.time())
+        os.chdir(self.data_path)
+        file_name_list = glob.glob('*.xml')
+        final_status_string = ''
+        final_diary_string = ''
+        for a_file in file_name_list:
+            (short_name, extension) = os.path.splitext(a_file)
+            job_path = os.path.join(self.data_path, a_file)
+            entry = EntryElement()
+            entry.read_from_xml(job_path)
+            temp_status_string = ''
+            temp_comment_string = ''
+            status_modified_today = False
+            comment_modified_today = False
+            for loop in entry.status_change_list:
+                if date.fromtimestamp(float(loop['time'])) == date_today:
+                    status_modified_today = True
+                    temp_status_string += time.strftime('\t%H:%M:%S: ',
+                                                        time.localtime(float(loop['time']))) + loop['to'] + '\n'
+            if status_modified_today is True:
+                final_status_string += 'Spent time on ' + short_name + ':\n' + temp_status_string
+            for loop in entry.comment_list:
+                if date.fromtimestamp(float(loop['time'])) == date_today:
+                    comment_modified_today = True
+                    temp_comment_string += time.strftime('\t%H:%M:%S: ', time.localtime(float(loop['time']))) + \
+                                           loop['content'] +'\n'
+            if comment_modified_today is True:
+                final_diary_string += 'Comments about ' + short_name + ':\n' +\
+                                      temp_comment_string
+
+        print(final_status_string)
+        print("====== What I wanted to remember today: ======")
+        print(final_diary_string)
 
 
 if __name__ == "__main__":
@@ -176,5 +239,7 @@ if __name__ == "__main__":
         file_operator.dump_md_file(options.name)
     elif (options.name is None) & (options.dump is True):
         file_operator.dump_daily_digest()
+    elif (options.name is None) & (options.show is True):
+        file_operator.show_daily_digest()
     else:
         pass
