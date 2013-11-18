@@ -28,10 +28,9 @@ class FileOperator(object):
 
     def create_job(self, job_name):
         print(time.strftime('%Y-%m-%d, %H:%M:%S, new job ', time.localtime(time.time())) + job_name + ' is created')
-        self.current_job_path = os.path.join(self.data_path, job_name)
+        self.current_job_path = os.path.join(self.data_path, job_name+'.xml')
         if not os.path.isfile(self.current_job_path):
             os.popen('touch ' + self.current_job_path)
-            print(type(self.current_job_path))
             category = input('specify to a category ')
             create_time = time.time()
             job_entry = EntryElement(job_name, category, 'created', create_time)
@@ -47,7 +46,7 @@ class FileOperator(object):
             print('Job named ' + job_name + ' already existed')
 
     def comment_a_job(self, job_name, comment):
-        job_path = os.path.join(self.data_path, job_name)
+        job_path = os.path.join(self.data_path, job_name+'.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         xml.etree.ElementTree.SubElement(root[1], 'comment_element',
@@ -59,7 +58,7 @@ class FileOperator(object):
         alias_controler = AliasListControl()
 
     def suspend_job(self, name):
-        job_path = os.path.join(self.data_path, name)
+        job_path = os.path.join(self.data_path, name+'.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         status = None
@@ -79,7 +78,7 @@ class FileOperator(object):
         self.save_current_job_info()
 
     def proceeding_job(self, name):
-        job_path = os.path.join(self.data_path, name)
+        job_path = os.path.join(self.data_path, name+'.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         status_change_time = str(time.time())
@@ -104,7 +103,7 @@ class FileOperator(object):
         self.save_current_job_info()
 
     def finalize_job(self, name):
-        job_path = os.path.join(self.data_path, name)
+        job_path = os.path.join(self.data_path, name+'.xml')
         tree = xml.etree.ElementTree.parse(job_path)
         root = tree.getroot()
         status = None
@@ -124,13 +123,13 @@ class FileOperator(object):
         self.save_current_job_info()
 
     def show_comments(self, name):
-        job_path = os.path.join(self.data_path, name)
+        job_path = os.path.join(self.data_path, name+'.xml')
         entry = EntryElement()
         entry.read_from_xml(job_path)
         print(entry)
 
     def dump_md_file(self, name):
-        job_path = os.path.join(self.data_path, name)
+        job_path = os.path.join(self.data_path, name+'.xml')
         entry = EntryElement()
         entry.read_from_xml(job_path)
         digest_path = os.path.join(self.digest_path, name + '.md')
