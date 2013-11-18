@@ -136,6 +136,8 @@ class FileOperator(object):
         generator = MarkDownGenerator(entry, os.path.expanduser(digest_path))
         generator.generate_process()
 
+    def dump_daily_digest(self):
+        print("daily digest will be here")
 
 
 
@@ -153,7 +155,7 @@ if __name__ == "__main__":
     parser.add_option('-f', '--finalize', action='store_true', dest='finalize', default=False,
                       help='mark a job as finished')
     parser.add_option('-o', '--show', action='store_true', dest='show', default=False, help='show comments')
-    parser.add_option('-d', '--dump', action='store_true', dest='dump_path', default=False,
+    parser.add_option('-d', '--dump', action='store_true', dest='dump', default=False,
                       help='specify a .md file path to generate a markdown format diary')
     (options, args) = parser.parse_args()
     if options.new_job_name is not None:
@@ -170,7 +172,9 @@ if __name__ == "__main__":
         file_operator.finalize_job(options.name)
     elif (options.name is not None) & (options.show is True):
         file_operator.show_comments(options.name)
-    elif (options.name is not None) & (options.dump_path is True):
+    elif (options.name is not None) & (options.dump is True):
         file_operator.dump_md_file(options.name)
+    elif (options.name is None) & (options.dump is True):
+        file_operator.dump_daily_digest()
     else:
         pass
