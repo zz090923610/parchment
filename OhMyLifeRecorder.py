@@ -266,9 +266,9 @@ if __name__ == "__main__":
         file_operator.show_comments(options.name)
     elif (options.name is not None) & (options.dump is True):
         file_operator.dump_md_file(options.name)
-    elif (options.name is None) & (options.dump is True) & (options.renren is False):
+    elif (options.name is None) & (options.dump is True):
         file_operator.dump_daily_digest()
-    elif (options.name is None) & (options.dump is True) & (options.renren is True):
+    elif (options.name is None) & (options.renren is True):
         file_operator.post_to_renren()
     elif (options.name is None) & (options.show is True):
         file_operator.show_daily_digest()
