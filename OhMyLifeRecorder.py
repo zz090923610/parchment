@@ -6,9 +6,11 @@ import time
 import glob
 import os
 import xml
+import markdown
 from EntryElement import *
 from AliasListControl import *
 from MarkdownGenerator import *
+from RenrenHandler import *
 from datetime import date
 
 
@@ -164,6 +166,33 @@ class FileOperator(object):
                 generator.generate_daily_digest_an_entry(entry)
         generator.generate_daily_digest()
 
+    def post_to_renren(self):
+        date_today = date.fromtimestamp(time.time())
+        os.chdir(self.data_path)
+        file_name_list = glob.glob('*.xml')
+        digest_path = os.path.join(self.digest_path, 'DailyDigest' + str(date_today) + '.md')
+        generator = MarkDownGenerator(os.path.expanduser(digest_path),date_today)
+        for a_file in file_name_list:
+            job_path = os.path.join(self.data_path, a_file)
+            entry = EntryElement()
+            entry.read_from_xml(job_path)
+            status_modified_today = False
+            comment_modified_today = False
+            for loop in entry.status_change_list:
+                if date.fromtimestamp(float(loop['time'])) == date_today:
+                    status_modified_today = True
+                    break
+            for loop in entry.comment_list:
+                if date.fromtimestamp(float(loop['time'])) == date_today:
+                    comment_modified_today = True
+                    break
+            if (comment_modified_today is True) | (status_modified_today is True):
+                generator.generate_daily_digest_an_entry(entry)
+        digest =markdown.markdown(str(generator.generate_daily_digest()))
+        renren_handler = Renren()
+        renren_handler.setAccount('formywillzq@hotmail.com', 'aa9-q9d302')
+        renren_handler.login()
+        renren_handler.post_renren_blog('DailyDigest' + str(date_today), digest)
 
 
     def show_daily_digest(self):
@@ -219,6 +248,7 @@ if __name__ == "__main__":
     parser.add_option('-o', '--show', action='store_true', dest='show', default=False, help='show comments')
     parser.add_option('-d', '--dump', action='store_true', dest='dump', default=False,
                       help='specify a .md file path to generate a markdown format diary')
+    parser.add_option('-r','--renren', action='store_true', dest='renren', default=False, help='post to Renren.com')
     (options, args) = parser.parse_args()
     if options.new_job_name is not None:
         file_operator.create_job(options.new_job_name)
@@ -236,8 +266,10 @@ if __name__ == "__main__":
         file_operator.show_comments(options.name)
     elif (options.name is not None) & (options.dump is True):
         file_operator.dump_md_file(options.name)
-    elif (options.name is None) & (options.dump is True):
+    elif (options.name is None) & (options.dump is True) & (options.renren is False):
         file_operator.dump_daily_digest()
+    elif (options.name is None) & (options.dump is True) & (options.renren is True):
+        file_operator.post_to_renren()
     elif (options.name is None) & (options.show is True):
         file_operator.show_daily_digest()
     else:

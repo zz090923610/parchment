@@ -1,4 +1,5 @@
 # coding=utf-8
+from getpass import getpass
 import urllib.request, urllib.error, urllib.parse
 import http.cookiejar
 import re
@@ -7,6 +8,7 @@ import json
 import sys
 import urllib.request, urllib.parse, urllib.error
 from bs4 import BeautifulSoup
+
 
 class Renren(object):
     RENREN_HEADER = "http://www.renren.com/"
@@ -25,8 +27,8 @@ class Renren(object):
         self.hostid = None
 
     def setAccount(self, user, pw):
-        self.username = user
-        self.password = pw
+        self.username = input('Renren Account: ')
+        self.password = getpass(prompt='Password: ')
 
     def login(self):
         post = {
@@ -56,8 +58,6 @@ class Renren(object):
             return True
 
     def publishStatus(self, status):
-        if not self.loggedon:
-            raise AccountWarning
         target = self.SHELL_HEADER + self.hostid + "/status"
         post = urlencode(
             {"content": status + sys.version,
@@ -83,17 +83,15 @@ class Renren(object):
         )
         result = urllib.request.urlopen(req)
 
-    def post_renren_blog(self):
+    def post_renren_blog(self, name='None', body='None'):
         post_blog_url = 'http://blog.renren.com/NewEntry.do'
         req = urllib.request.urlopen(post_blog_url).read()
         soup = BeautifulSoup(req)
-        post_id = soup.find(id = 'postFormId').get('value')
-        body = '2to3 test'
+        post_id = soup.find(id='postFormId').get('value')
         post_data = urllib.parse.urlencode(
-            {'title': 'test3', 'body': body, 'categoryId': '0', 'blogControl': '99', 'postFormId': post_id,
+            {'title': name, 'body': body, 'categoryId': '0', 'blogControl': '99', 'postFormId': post_id,
              'relative_optype': 'saveDraft', "hostid": self.hostid, "requestToken": self.reqToken, "_rtk": self._rtk})
         self.auto_post(post_blog_url, post_data)
-        print(post_data)
 
 
 def get_cookie_by_name(cookiejar, name):

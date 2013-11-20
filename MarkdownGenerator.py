@@ -15,7 +15,7 @@ class MarkDownGenerator(object):
         self.final_status_string = ''
         self.final_comment_string = ''
         self.meta = '\n<h6>This digest is generated automatically by OhMyLifeRecorder.</h6>\n' \
-                    'You can get more information here: https://github.com/zz090923610/OhMyLifeRecorder'
+                    'You can get more information here: [https://github.com/zz090923610/OhMyLifeRecorder](https://github.com/zz090923610/OhMyLifeRecorder)'
 
     def generate_daily_digest_header(self):
         self.final_string += '<h1>OhMyLifeRecorder Daily Digest: ' + str(self.date) + '</h1>\n'
@@ -30,7 +30,7 @@ class MarkDownGenerator(object):
         for loop in entry.status_change_list:
             if date.fromtimestamp(float(loop['time'])) == self.date:
                 status_modified_today = True
-                temp_status_string += '\t\t\t<li>' + time.strftime('`%H:%M:%S`',
+                temp_status_string += '\t\t\t<li>'  + time.strftime('%H:%M:%S ',
                                                                    time.localtime(float(loop['time']))) + loop[
                                           'to'] + '</li>\n'
         temp_status_string += '\t\t</ul>\n'
@@ -40,7 +40,7 @@ class MarkDownGenerator(object):
         for loop in entry.comment_list:
             if date.fromtimestamp(float(loop['time'])) == self.date:
                 comment_modified_today = True
-                temp_comment_string += '\t\t\t<li>' + time.strftime('`%H:%M:%S`',
+                temp_comment_string += '\t\t\t<li>' + time.strftime('%H:%M:%S ',
                                                                     time.localtime(float(loop['time']))) + \
                                        loop['content'] + '</li>\n'
         temp_comment_string += '\t\t</ul>\n'
@@ -60,6 +60,7 @@ class MarkDownGenerator(object):
             self.final_string += '\n<ul>\n' + self.final_comment_string + '</ul>\n'
         self.final_string += self.meta
         self.write_out()
+        return self.final_string
 
     def generate_job_header(self):
         self.final_string += '<h1>OhMyLifeRecorder Digest</h1>\n'
