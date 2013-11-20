@@ -1,9 +1,9 @@
-import glob
-
+#!/usr/bin/env python3
 __author__ = 'zhangzhao'
 
 from optparse import OptionParser
 import time
+import glob
 import os
 import xml
 from EntryElement import *
