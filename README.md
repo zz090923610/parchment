@@ -1,4 +1,4 @@
-OhMyLifeRecorder
+关于OhMyLifeRecorder的更新
 ================
 
 怎么说呢。最初写这个软件的动机，是因为自己每天对着电脑的时间很长。一天过后却又记不起当天到底做了什么。
@@ -53,7 +53,7 @@ OhMyLifeRecorder
 相关。所以`comment`被设计为依赖`job`。这样可以实现一个琐碎语句与进行中事项的高度结合。当然对于与所做事情无关的`comment`，我们完全可以把他们关联到前述2中的分类。</li>
 
 <li>创建`job` : `recorder -c"WorkName"`推荐使用大驼峰命名方式，因为之后会直接用这个名字创建文件，所以推荐使用字母数字下划线，最好不要留空格。</li>
-<li>刷新shell配置。如果最初你添加了`alias refresh_aliases='source /path/to/bash_configure_file'`到shell配置文件中，你只需输入`refresh_aliases`即可实现刷新。 这步的原因是创建工作后为了实现极简化操作Recorder会创建一个以jobWorkName为名字的alias。根据Unix系统机制和shell程序机制，我们需要手动刷新一下shell配置来使新添加的alias生效，或是重启shell使之生效。[为什么不能自动生效？](http://stackoverflow.com/questions/19946321/create-unix-alias-using-a-python3-script </li>)
+<li>刷新shell配置。如果最初你添加了`alias refresh_aliases='source /path/to/bash_configure_file'`到shell配置文件中，你只需输入`refresh_aliases`即可实现刷新。 这步的原因是创建工作后为了实现极简化操作Recorder会创建一个以jobWorkName为名字的alias。根据Unix系统机制和shell程序机制，我们需要手动刷新一下shell配置来使新添加的alias生效，或是重启shell使之生效。[为什么不能自动生效？](http://stackoverflow.com/questions/19946321/create-unix-alias-using-a-python3-script)</li>
 <li>更改`job`的状态:
 
 `job`状态一共分为4类。created, proceeding, suspended, finished。我们需要根据实际情况在不同时间切换某一`job`的状态，以实现记录我们`job`状况，掌握时间开销。
@@ -121,8 +121,14 @@ OhMyLifeRecorder
 </li>
 </p>
 
+<h3>其他问题</h3>
+<ul>
+<li><h6>为什么用python？<h6>总的说做这种小快灵的东西，或是实现一个想法，python这类脚本语言实现起来总是很快的。特别是在实验某些原型的功能时。</li>
+<li><h6>为什么还没做windows版？没做跨平台测试？</h6>时间太紧。日后都会有的。</li>
+<li><h6>为什么一定要使用shell？没有GUI版？</h6>首先这个想法形成时针对的用户群还是*nix程序员。对于他们shell是最快最好的一个选择。至于GUI版，之后会有的。</li>
+<li><h6>为何源码看起来十分粗糙？</h6>在这一阶段主要关心功能的实现，下一阶段将会对代码的简洁性，完整性，和整体效率做优化和考量。</li>
+</ul>
 
-
-
+<h6>最后，感谢大家，若是您也对ohMyLifeRecorder感兴趣，请在github上[fork](https://github.com/zz090923610/OhMyLifeRecorder)之～</h6>
 
 
