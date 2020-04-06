@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="56ef0eba-1a12-4cbc-b290-ccf95ee1bda0" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/repo_mgr.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/repo_mgr.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -67,7 +68,7 @@
       <option name="presentableId" value="Default" />
       <updated>1567372943321</updated>
       <workItem from="1586115703523" duration="12105000" />
-      <workItem from="1586143833401" duration="1430000" />
+      <workItem from="1586143833401" duration="2109000" />
     </task>
     <servers />
   </component>

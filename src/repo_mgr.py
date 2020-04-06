@@ -10,7 +10,7 @@
 import os
 import time
 
-from src.config import config_load
+from src.config import config_load, config_save
 from src.ssh_mgr import SSHHdl
 import logging
 import getpass
@@ -106,6 +106,11 @@ class RepoHDL:
         os.system(
             "cd  %s/%s; git add --all&& git commit -m\'%s\'&& git push" % (self.local_store_dir, name, comment_str))
 
+    def list(self):
+        res = self.ssh_hdl.exec_cmd("ls | grep .git", ret=True)["stdout"]
+        res = [i.replace(".git", "") for i in res]
+        return res
+
 
 def main():
     import sys
@@ -117,13 +122,25 @@ def main():
         exit()
     cmd = sys.argv[1]
     name = sys.argv[2]
-    conf = config_load()
-    if conf == {}:
+    conf = config_load(path=config_path)
+    print(conf)
+    update_conf = False
+    if "server_hosts" not in conf:
         try:
-            conf["server_hosts"] = [input("Please specify backend server hostname: ").strip().replace("\'", "").replace("\"","")]
-            conf["key_path"] = input("Please specify path to git key: ").strip().replace("\'", "").replace("\"", "")
+            conf["server_hosts"] = [
+                input("Please specify backend server hostname: ").strip().replace("\'", "").replace("\"", "")]
+            update_conf = True
         except KeyboardInterrupt:
             exit()
+    if "key_path" not in conf:
+        try:
+            conf["key_path"] = input("Please specify path to git key: ").strip().replace("\'", "").replace("\"", "")
+            update_conf = True
+        except KeyboardInterrupt:
+            exit()
+    if update_conf:
+        config_save(conf, path=config_path)
+
     a = RepoHDL(conf["server_hosts"], conf["key_path"])
     if cmd == "create":
         a.create_repo(name)
