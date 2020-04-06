@@ -7,11 +7,10 @@
 
 # topic sync (pull push):
 
-# CFG_RECORD server_alias []
-# CFG_RECORD login_cred ""
 import os
 import time
 
+from src.config import config_load
 from src.ssh_mgr import SSHHdl
 import logging
 import getpass
@@ -19,6 +18,9 @@ import getpass
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%d-%m-%Y:%H:%M:%S',
                     level=logging.INFO)
+
+parchment_data_dir = "~/parchment_data"  # STATIC_CONFIG
+config_path = "~/.parchment.json"  # STATIC_CONFIG
 
 
 class RepoHDL:
@@ -28,7 +30,7 @@ class RepoHDL:
         self.server_hosts = server_hosts  # alias of same host
         self.user = "git"
         self.key_path = key_path
-        self.local_store_dir = os.path.expanduser("~/parchment_data")
+        self.local_store_dir = os.path.expanduser(parchment_data_dir)
         os.makedirs(self.local_store_dir, exist_ok=True)
         for h in self.server_hosts:
             if "onion" in h:
@@ -100,5 +102,34 @@ class RepoHDL:
         user = getpass.getuser()
         machine = os.uname()[1]
         date_time = time.asctime(time.localtime(time.time()))
-        comment_str = "%s@%s:%s" %(user, machine, date_time)
-        os.system("cd  %s/%s; git add --all&& git commit -m\'%s\'&& git push" % (self.local_store_dir, name, comment_str))
+        comment_str = "%s@%s:%s" % (user, machine, date_time)
+        os.system(
+            "cd  %s/%s; git add --all&& git commit -m\'%s\'&& git push" % (self.local_store_dir, name, comment_str))
+
+
+def main():
+    import sys
+    # parchment_repo create name
+    # parchment_repo delete name
+    # parchment_repo push name
+    # parchment_repo pull name
+    if len(sys.argv) != 3:
+        exit()
+    cmd = sys.argv[1]
+    name = sys.argv[2]
+    conf = config_load()
+    if conf == {}:
+        try:
+            conf["server_hosts"] = [input("Please specify backend server hostname: ").strip().replace("\'", "").replace("\"","")]
+            conf["key_path"] = input("Please specify path to git key: ").strip().replace("\'", "").replace("\"", "")
+        except KeyboardInterrupt:
+            exit()
+    a = RepoHDL(conf["server_hosts"], conf["key_path"])
+    if cmd == "create":
+        a.create_repo(name)
+    elif cmd == "delete":
+        a.delete_repo(name)
+    elif cmd == "push":
+        a.push(name)
+    elif cmd == "pull":
+        a.pull(name)
