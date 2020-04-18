@@ -8,6 +8,9 @@ setup(
     entry_points="""
 [console_scripts]
 parchment_repo = src.repo_mgr:main
+parchment_words = src.topic_mgr:parchment_words
+parchment_para = src.topic_mgr:parchment_para
+parchment_ref = src.topic_mgr:parchment_ref
 """,
     license='MIT',
     author='zhangzhao',
