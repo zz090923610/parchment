@@ -10,7 +10,9 @@
 import os
 import time
 
-from src.config import config_load, config_save
+import paramiko
+
+from src.config import config_load, config_save, parchment_data_dir, config_path, get_conf
 from src.ssh_mgr import SSHHdl
 import logging
 import getpass
@@ -19,8 +21,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
                     datefmt='%d-%m-%Y:%H:%M:%S',
                     level=logging.INFO)
 
-parchment_data_dir = "~/parchment_data"  # STATIC_CONFIG
-config_path = "~/.parchment.json"  # STATIC_CONFIG
+
 
 
 class RepoHDL:
@@ -35,7 +36,11 @@ class RepoHDL:
         for h in self.server_hosts:
             if "onion" in h:
                 pass  # TODO add Tor proxy support
-            self.ssh_hdl = SSHHdl(h, self.user, self.key_path)
+            try:
+                self.ssh_hdl = SSHHdl(h, self.user, self.key_path)
+            except paramiko.ssh_exception.SSHException as e:
+                self.logger.error("%s" % e)
+                exit()
             if self.ssh_hdl.ready():
                 self.logger.info("Backend server connected.")
                 self.valid_host = h
@@ -122,24 +127,7 @@ def main():
         exit()
     cmd = sys.argv[1]
     name = sys.argv[2]
-    conf = config_load(path=config_path)
-    print(conf)
-    update_conf = False
-    if "server_hosts" not in conf:
-        try:
-            conf["server_hosts"] = [
-                input("Please specify backend server hostname: ").strip().replace("\'", "").replace("\"", "")]
-            update_conf = True
-        except KeyboardInterrupt:
-            exit()
-    if "key_path" not in conf:
-        try:
-            conf["key_path"] = input("Please specify path to git key: ").strip().replace("\'", "").replace("\"", "")
-            update_conf = True
-        except KeyboardInterrupt:
-            exit()
-    if update_conf:
-        config_save(conf, path=config_path)
+    conf = get_conf()
 
     a = RepoHDL(conf["server_hosts"], conf["key_path"])
     if cmd == "create":
