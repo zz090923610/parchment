@@ -11,7 +11,10 @@ parchment_repo = src.repo_mgr:main
 parchment_words = src.topic_mgr:parchment_words
 parchment_para = src.topic_mgr:parchment_para
 parchment_ref = src.topic_mgr:parchment_ref
+<<<<<<< HEAD
 parchment_timeline = src.topic_mgr:parchment_timeline
+=======
+>>>>>>> d55657c89246b45de9dd365ec4594cbedd713604
 """,
     license='MIT',
     author='zhangzhao',

@@ -133,7 +133,10 @@ class TopicHDL:
         self.save_meta()
 
     def read_piece(self, store_hash):
+<<<<<<< HEAD
         import datetime
+=======
+>>>>>>> d55657c89246b45de9dd365ec4594cbedd713604
         if store_hash not in self.meta_data:
             return
         meta = self.meta_data[store_hash]
@@ -144,6 +147,7 @@ class TopicHDL:
         else:  # meta["type"] == "words":
             file_name = "%s.txt" % store_hash
         full_path = os.path.join(self.repo_root, self.name, file_name)
+<<<<<<< HEAD
         if meta["type"] == "ref":
             os.system("xdg-open %s" % full_path)
         else:  # meta["type"] == "words":
@@ -156,6 +160,14 @@ class TopicHDL:
             #    l = f.readline()
             #    print(l)
             os.system("echo \'%s\'" % "\n<<<<<<<<< EOF %s %s\n" % (title, item_date))
+=======
+        if meta["type"] in ["para", "ref"]:
+            os.system("xdg-open %s" % full_path)
+        else:  # meta["type"] == "words":
+            with open(full_path, "r") as f:
+                l = f.readline()
+                print(l)
+>>>>>>> d55657c89246b45de9dd365ec4594cbedd713604
 
 
 # noinspection DuplicatedCode
@@ -213,6 +225,7 @@ def parchment_ref():
             rm.create_repo(topic)
     a = TopicHDL(parchment_data_dir, topic)
     a.create_piece("ref", ref_path=ref_path)
+<<<<<<< HEAD
 
 
 # noinspection DuplicatedCode
@@ -232,3 +245,5 @@ def parchment_timeline():
     a = TopicHDL(parchment_data_dir, topic)
     for meta_hash in a.meta_data:
         a.read_piece(meta_hash)
+=======
+>>>>>>> d55657c89246b45de9dd365ec4594cbedd713604
